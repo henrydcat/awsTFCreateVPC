@@ -79,6 +79,9 @@ resource "aws_key_pair" "default" {
   public_key = "${file("${var.key_path}")}"
 }
 
+#define template file for userdata
+data "template_file" "user_data" {  template = "${file("install.sh")}" }
+
 # Define a host
 resource "aws_instance" "host" {
    ami  = "${var.ami}"
@@ -88,7 +91,7 @@ resource "aws_instance" "host" {
    vpc_security_group_ids = ["${aws_security_group.sgweb.id}"]
    associate_public_ip_address = true
    source_dest_check = false
-   user_data = "${file("install.sh")}"
+   user_data = "${data.template_file.user_data.rendered}"
    tags {
      Name  = "${var.hostname}"
      project = "${var.tag_project}"
